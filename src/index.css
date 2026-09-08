@@ -1,3 +1,213 @@
-body {
+/* ===== GLOBAL RESET & BASE ===== */
+*, *::before, *::after {
+  box-sizing: border-box;
   margin: 0;
+  padding: 0;
+}
+
+html {
+  font-size: 16px;
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  font-size: 0.9375rem;
+  line-height: 1.5;
+  color: var(--color-text-primary);
+  background-color: var(--color-bg-base);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ===== DESIGN TOKENS ===== */
+:root {
+  /* --- Brand Colors --- */
+  --color-brand-primary: #1e40af;
+  --color-brand-primary-hover: #1d3a9e;
+  --color-brand-secondary: #0f172a;
+  --color-brand-accent: #f59e0b;
+  --color-brand-accent-hover: #d97706;
+
+  /* --- Backgrounds --- */
+  --color-bg-base: #f0f2f5;
+  --color-bg-surface: #ffffff;
+  --color-bg-elevated: #ffffff;
+  --color-bg-sidebar: #0f172a;
+  --color-bg-sidebar-hover: rgba(255, 255, 255, 0.07);
+  --color-bg-sidebar-active: rgba(30, 64, 175, 0.85);
+  --color-bg-topbar: #ffffff;
+  --color-bg-input: #ffffff;
+  --color-bg-muted: #f8fafc;
+  --color-bg-overlay: rgba(15, 23, 42, 0.65);
+
+  /* --- Borders --- */
+  --color-border: #e2e8f0;
+  --color-border-strong: #cbd5e1;
+  --color-border-focus: #1e40af;
+  --color-border-sidebar: rgba(255, 255, 255, 0.08);
+
+  /* --- Text --- */
+  --color-text-primary: #0f172a;
+  --color-text-secondary: #475569;
+  --color-text-muted: #94a3b8;
+  --color-text-inverse: #ffffff;
+  --color-text-sidebar: rgba(255, 255, 255, 0.75);
+  --color-text-sidebar-active: #ffffff;
+  --color-text-sidebar-group: rgba(255, 255, 255, 0.35);
+  --color-text-link: #1e40af;
+
+  /* --- Status Colors --- */
+  --color-status-success: #16a34a;
+  --color-status-success-bg: #f0fdf4;
+  --color-status-success-border: #bbf7d0;
+  --color-status-warning: #d97706;
+  --color-status-warning-bg: #fffbeb;
+  --color-status-warning-border: #fde68a;
+  --color-status-danger: #dc2626;
+  --color-status-danger-bg: #fef2f2;
+  --color-status-danger-border: #fecaca;
+  --color-status-info: #0284c7;
+  --color-status-info-bg: #f0f9ff;
+  --color-status-info-border: #bae6fd;
+  --color-status-neutral: #64748b;
+  --color-status-neutral-bg: #f8fafc;
+  --color-status-neutral-border: #e2e8f0;
+
+  /* --- Priority Colors --- */
+  --color-priority-critical: #dc2626;
+  --color-priority-high: #ea580c;
+  --color-priority-medium: #d97706;
+  --color-priority-low: #16a34a;
+
+  /* --- OEE / KPI Colors --- */
+  --color-kpi-blue: #1e40af;
+  --color-kpi-green: #059669;
+  --color-kpi-amber: #d97706;
+  --color-kpi-red: #dc2626;
+  --color-kpi-teal: #0d9488;
+  --color-kpi-purple: #7c3aed;
+
+  /* --- Typography Scale --- */
+  --text-xs: 0.75rem;
+  --text-sm: 0.8125rem;
+  --text-base: 0.9375rem;
+  --text-md: 1rem;
+  --text-lg: 1.125rem;
+  --text-xl: 1.25rem;
+  --text-2xl: 1.5rem;
+  --text-3xl: 1.875rem;
+  --text-4xl: 2.25rem;
+  --text-5xl: 3rem;
+  --text-6xl: 3.75rem;
+
+  /* --- Font Weights --- */
+  --font-light: 300;
+  --font-regular: 400;
+  --font-medium: 500;
+  --font-semibold: 600;
+  --font-bold: 700;
+  --font-extrabold: 800;
+
+  /* --- Spacing --- */
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-5: 1.25rem;
+  --space-6: 1.5rem;
+  --space-8: 2rem;
+  --space-10: 2.5rem;
+  --space-12: 3rem;
+  --space-16: 4rem;
+  --space-20: 5rem;
+  --space-24: 6rem;
+
+  /* --- Radius --- */
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --radius-lg: 8px;
+  --radius-xl: 12px;
+  --radius-2xl: 16px;
+  --radius-full: 9999px;
+
+  /* --- Shadows --- */
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 2px 8px rgba(0, 0, 0, 0.07), 0 1px 2px rgba(0, 0, 0, 0.05);
+  --shadow-lg: 0 4px 16px rgba(0, 0, 0, 0.08), 0 2px 4px rgba(0, 0, 0, 0.05);
+  --shadow-xl: 0 8px 32px rgba(0, 0, 0, 0.12), 0 4px 8px rgba(0, 0, 0, 0.06);
+  --shadow-2xl: 0 16px 48px rgba(0, 0, 0, 0.15), 0 6px 16px rgba(0, 0, 0, 0.08);
+  --shadow-sidebar: 2px 0 16px rgba(0, 0, 0, 0.15);
+
+  /* --- Layout --- */
+  --sidebar-width: 252px;
+  --sidebar-collapsed-width: 64px;
+  --topbar-height: 60px;
+
+  /* --- Transitions --- */
+  --transition-fast: 0.12s ease;
+  --transition-base: 0.18s ease;
+  --transition-slow: 0.28s ease;
+  --transition-sidebar: 0.22s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* ===== UTILITY CLASSES ===== */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}
+
+.truncate {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* ===== SCROLLBAR STYLING ===== */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--color-border-strong);
+  border-radius: var(--radius-full);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-text-muted);
+}
+
+/* ===== BASE ELEMENTS ===== */
+a {
+  color: var(--color-text-link);
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+button {
+  font-family: inherit;
+  cursor: pointer;
+}
+
+input, select, textarea {
+  font-family: inherit;
+}
+
+code, pre {
+  font-family: 'JetBrains Mono', 'Fira Code', monospace;
 }
