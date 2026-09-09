@@ -257,7 +257,7 @@ function ProductionOrders() {
     // Add Title
     doc.setFontSize(20)
     doc.setTextColor(primaryColor[0], primaryColor[1], primaryColor[2])
-    doc.text("NexusMES", 14, 22)
+    doc.text("MES", 14, 22)
 
     doc.setFontSize(14)
     doc.setTextColor(100, 100, 100)

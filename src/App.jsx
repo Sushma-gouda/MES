@@ -17,6 +17,7 @@ import Dashboard from "./pages/dashboard/Dashboard"
 import ProductionOrders from "./pages/production/ProductionOrders"
 import PlanningScheduling from "./pages/production/PlanningScheduling"
 import CapacityPlanning from "./pages/production/CapacityPlanning"
+import DispatchToMES from "./pages/production/DispatchToMES"
 import StagingKitting from "./pages/execute/StagingKitting"
 import OperationsBOM from "./pages/execute/OperationsBOM"
 import MachineSetup from "./pages/execute/MachineSetup"
@@ -53,6 +54,7 @@ function App() {
           <Route path="/production-orders" element={<ProductionOrders />} />
           <Route path="/planning" element={<PlanningScheduling />} />
           <Route path="/capacity" element={<CapacityPlanning />} />
+          <Route path="/mes-dispatch" element={<DispatchToMES />} />
 
           {/* Execute */}
           <Route path="/staging" element={<StagingKitting />} />

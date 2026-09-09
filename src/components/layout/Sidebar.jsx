@@ -121,6 +121,7 @@ const navGroups = [
       { label: "Production Orders", to: "/production-orders", icon: icons.orders },
       { label: "Planning & Scheduling", to: "/planning", icon: icons.schedule },
       { label: "Capacity Planning", to: "/capacity", icon: icons.capacity },
+      { label: "Dispatch to MES", to: "/mes-dispatch", icon: icons.execute },
     ]
   },
   {
@@ -167,7 +168,7 @@ function Sidebar({ collapsed, onToggle, mobileOpen, onMobileClose }) {
             {icons.factory}
           </div>
           <div className="sidebar-brand-text">
-            <span className="sidebar-brand-name">Nexus<span>MES</span></span>
+            <span className="sidebar-brand-name">MES</span>
             <span className="sidebar-brand-tagline">Manufacturing Execution</span>
           </div>
         </div>

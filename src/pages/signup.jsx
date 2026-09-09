@@ -125,7 +125,7 @@ function Signup() {
             Join the future of<br />smart manufacturing.
           </h1>
           <p className="auth-left-subheadline">
-            Set up your NexusMES account and bring full visibility to your production floor in minutes.
+            Set up your MES account and bring full visibility to your production floor in minutes.
           </p>
           <ul className="auth-left-features">
             <li className="auth-left-feature"><span className="auth-feature-dot" />Complete production order lifecycle</li>

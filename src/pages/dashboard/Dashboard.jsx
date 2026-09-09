@@ -1,16 +1,4 @@
-import {
-  XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer,
-  AreaChart, Area
-} from "recharts"
-import {
-  mockDashboardKPIs,
-  mockProductionTrend,
-  mockMachines,
-  mockAlerts,
-  mockActivityFeed,
-  mockCurrentShift,
-  mockProductionOrders,
-} from "../../data/mockData"
+import { useState, useEffect } from "react"
 import "../../styles/pages.css"
 import "../../styles/components.css"
 
@@ -25,9 +13,14 @@ function KPICard({ label, value, unit = "", delta, trend, color, icon }) {
       <div className="kpi-card-value">
         {value}{unit && <span style={{ fontSize: "0.55em", fontWeight: 500, color: "var(--color-text-secondary)", marginLeft: 2 }}>{unit}</span>}
       </div>
-      {delta && (
+      {delta && delta !== "—" && (
         <span className={`kpi-card-delta kpi-delta-${trend === "up" ? (color === "red" ? "down" : "up") : (color === "red" ? "up" : "down")}`}>
-          {trend === "up" ? "▲" : "▼"} {delta} vs prev. shift
+          {trend === "up" ? "▲" : "▼"} {delta}
+        </span>
+      )}
+      {(!delta || delta === "—") && (
+        <span className="kpi-card-delta" style={{ color: "var(--color-text-muted)" }}>
+          —
         </span>
       )}
     </div>
@@ -37,65 +30,83 @@ function KPICard({ label, value, unit = "", delta, trend, color, icon }) {
 // ===== STATUS BADGE =====
 function StatusBadge({ status }) {
   const map = {
-    "In Progress": "info",
-    "Completed": "success",
-    "Queued": "neutral",
-    "Released": "blue",
-    "On Hold": "warning",
-    "running": "success",
-    "idle": "warning",
-    "down": "danger",
-    "setup": "info",
+    "IN_PROGRESS": "info",
+    "COMPLETED": "success",
+    "RECEIVED": "neutral",
+    "RELEASED": "blue",
+    "ON_HOLD": "warning",
+    "READY": "blue",
+  }
+  const displayMap = {
+    "IN_PROGRESS": "In Progress",
+    "COMPLETED": "Completed",
+    "RECEIVED": "Received",
+    "RELEASED": "Released",
+    "ON_HOLD": "On Hold",
+    "READY": "Ready"
   }
   const variant = map[status] || "neutral"
+  const label = displayMap[status] || status
   return (
     <span className={`badge badge-${variant}`}>
-      <span className="badge-dot" />{status}
+      <span className="badge-dot" />{label}
     </span>
   )
 }
 
-// ===== MACHINE STATUS CARD =====
-function MachineCard({ machine }) {
-  const statusColor = { running: "green", idle: "amber", down: "red", setup: "blue" }
-  const color = statusColor[machine.status] || "gray"
-  return (
-    <div className={`machine-card status-${machine.status}`}>
-      <div className="machine-id">{machine.id}</div>
-      <div className="machine-name" title={machine.name}>{machine.name}</div>
-      <div className="machine-status-row">
-        <span className={`status-dot dot-${color}`} />
-        <span className="machine-status-label" style={{ textTransform: "capitalize" }}>{machine.status}</span>
-      </div>
-      {machine.job && <div className="machine-uptime" style={{ fontFamily: "JetBrains Mono, monospace" }}>{machine.job}</div>}
-      {machine.uptime !== "—" && <div className="machine-uptime">Uptime: {machine.uptime}</div>}
-    </div>
-  )
-}
-
-// ===== CUSTOM TOOLTIP =====
-function CustomTooltip({ active, payload, label }) {
-  if (!active || !payload?.length) return null
-  return (
-    <div style={{
-      background: "#0f172a", border: "1px solid rgba(255,255,255,0.1)",
-      borderRadius: 8, padding: "10px 14px", fontSize: 12, color: "#fff"
-    }}>
-      <div style={{ marginBottom: 6, fontWeight: 600, color: "#94a3b8" }}>{label}</div>
-      {payload.map(p => (
-        <div key={p.name} style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 3 }}>
-          <span style={{ width: 8, height: 8, borderRadius: "50%", background: p.color, display: "inline-block" }} />
-          <span style={{ color: "#cbd5e1" }}>{p.name}:</span>
-          <span style={{ fontWeight: 600 }}>{p.value}</span>
-        </div>
-      ))}
-    </div>
-  )
-}
-
 function Dashboard() {
-  const kpis = mockDashboardKPIs
-  const upcomingOrders = mockProductionOrders.filter(o => o.status === "In Progress" || o.status === "Queued").slice(0, 5)
+  const [orders, setOrders] = useState([])
+  const [eligibleSchedules, setEligibleSchedules] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState("")
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        setLoading(true)
+        setError("")
+        const token = localStorage.getItem("access_token")
+        if (!token) return
+
+        const headers = { Authorization: `Bearer ${token}` }
+
+        const [ordersRes, schedulesRes] = await Promise.all([
+          fetch("http://127.0.0.1:8000/production-orders/", { headers }),
+          fetch("http://127.0.0.1:8000/dispatch-mes/eligible", { headers })
+        ])
+
+        if (!ordersRes.ok) throw new Error("Failed to fetch production orders")
+        
+        const ordersData = await ordersRes.json()
+        const schedulesData = schedulesRes.ok ? await schedulesRes.json() : []
+
+        setOrders(ordersData)
+        setEligibleSchedules(schedulesData)
+      } catch (err) {
+        setError(err.message)
+      } finally {
+        setLoading(false)
+      }
+    }
+    fetchData()
+  }, [])
+
+  const today = new Date().toISOString().split('T')[0]
+  
+  // Calculate KPIs
+  const ordersDueToday = orders.filter(o => o.due_date && o.due_date.startsWith(today)).length
+  const inProgress = orders.filter(o => o.status === "IN_PROGRESS").length
+  const completedToday = orders.filter(o => o.status === "COMPLETED" && o.updated_at && o.updated_at.startsWith(today)).length
+
+  // Shift info (mocked date, since there's no shift API)
+  const currentDateStr = new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' })
+  
+  // Map eligible schedules to Upcoming Orders
+  const upcomingOrders = eligibleSchedules.slice(0, 5)
+
+  if (loading) {
+    return <div style={{ padding: "var(--space-8)", color: "var(--color-text-muted)" }}>Loading dashboard...</div>
+  }
 
   return (
     <div>
@@ -103,71 +114,73 @@ function Dashboard() {
       <div className="shift-banner">
         <div className="shift-info">
           <span className="shift-label">Current Shift</span>
-          <span className="shift-value">{mockCurrentShift.name} ({mockCurrentShift.code}) · {mockCurrentShift.start}–{mockCurrentShift.end}</span>
+          <span className="shift-value">N/A (Module 6)</span>
         </div>
         <div className="shift-info">
           <span className="shift-label">Date</span>
-          <span className="shift-value">{mockCurrentShift.date}</span>
+          <span className="shift-value">{currentDateStr}</span>
         </div>
         <div className="shift-info">
           <span className="shift-label">Supervisor</span>
-          <span className="shift-value">{mockCurrentShift.supervisor}</span>
+          <span className="shift-value">—</span>
         </div>
         <div className="shift-info">
           <span className="shift-label">Operators On Floor</span>
-          <span className="shift-value">{mockCurrentShift.operators}</span>
+          <span className="shift-value">—</span>
         </div>
         <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-          <span className="status-dot dot-green dot-live" />
-          <span style={{ color: "rgba(255,255,255,0.65)", fontSize: "var(--text-sm)" }}>Live</span>
+          <span className="status-dot dot-amber" />
+          <span style={{ color: "rgba(255,255,255,0.65)", fontSize: "var(--text-sm)" }}>Partial Live</span>
         </div>
       </div>
+
+      {error && <div style={{ color: "var(--color-status-danger)", marginBottom: "var(--space-4)" }}>Error: {error}</div>}
 
       {/* KPI Row 1 — Orders */}
       <div className="page-header" style={{ marginBottom: "var(--space-2)" }}>
         <div className="page-header-left">
           <div className="page-header-eyebrow">Control Center</div>
           <h1 className="page-header-title">Production Dashboard</h1>
-          <p className="page-header-subtitle">Real-time overview — {mockCurrentShift.date}</p>
+          <p className="page-header-subtitle">Real-time overview — {currentDateStr}</p>
         </div>
       </div>
 
       <div className="dashboard-kpi-row">
-        <KPICard label="Orders Due Today" value={kpis.ordersDueToday.value} delta={kpis.ordersDueToday.delta} trend={kpis.ordersDueToday.trend} color="blue"
+        <KPICard label="Orders Due Today" value={ordersDueToday} delta="—" color="blue"
           icon={<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2" /><rect x="9" y="3" width="6" height="4" rx="1" /></svg>} />
-        <KPICard label="In Progress" value={kpis.inProgress.value} delta={kpis.inProgress.delta} trend={kpis.inProgress.trend} color="teal"
+        <KPICard label="In Progress" value={inProgress} delta="—" color="teal"
           icon={<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="5 3 19 12 5 21 5 3" /></svg>} />
-        <KPICard label="Completed Today" value={kpis.completedToday.value} delta={kpis.completedToday.delta} trend={kpis.completedToday.trend} color="green"
+        <KPICard label="Completed Today" value={completedToday} delta="—" color="green"
           icon={<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12" /></svg>} />
-        <KPICard label="Quality Issues" value={kpis.qualityIssues.value} delta={kpis.qualityIssues.delta} trend={kpis.qualityIssues.trend} color="red"
+        <KPICard label="Quality Issues" value="N/A" delta="—" color="red"
           icon={<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" /></svg>} />
       </div>
 
       {/* OEE Row */}
       <div className="dashboard-kpi-row" style={{ marginBottom: "var(--space-5)" }}>
         {[
-          { label: "OEE", value: kpis.oee.value, unit: "%", delta: kpis.oee.delta, color: "#1e40af" },
-          { label: "Availability", value: kpis.availability.value, unit: "%", delta: kpis.availability.delta, color: "#059669" },
-          { label: "Performance", value: kpis.performance.value, unit: "%", delta: kpis.performance.delta, color: "#d97706" },
-          { label: "Quality Rate", value: kpis.quality.value, unit: "%", delta: kpis.quality.delta, color: "#0d9488" },
+          { label: "OEE", value: "—", unit: "", color: "#1e40af" },
+          { label: "Availability", value: "—", unit: "", color: "#059669" },
+          { label: "Performance", value: "—", unit: "", color: "#d97706" },
+          { label: "Quality Rate", value: "—", unit: "", color: "#0d9488" },
         ].map(metric => (
           <div key={metric.label} className="card" style={{ padding: "var(--space-5)" }}>
             <div style={{ fontSize: "var(--text-xs)", fontWeight: 600, color: "var(--color-text-secondary)", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: "var(--space-3)" }}>
               {metric.label}
             </div>
-            <div style={{ fontSize: "var(--text-3xl)", fontWeight: 800, color: metric.color, letterSpacing: "-0.04em", lineHeight: 1 }}>
+            <div style={{ fontSize: "var(--text-3xl)", fontWeight: 800, color: metric.value === "—" ? "var(--color-text-muted)" : metric.color, letterSpacing: "-0.04em", lineHeight: 1 }}>
               {metric.value}<span style={{ fontSize: "0.5em", marginLeft: 2 }}>{metric.unit}</span>
             </div>
             <div style={{ marginTop: "var(--space-3)" }}>
               <div className="progress-bar-track">
                 <div
                   className="progress-bar-fill"
-                  style={{ width: `${metric.value}%`, background: metric.color }}
+                  style={{ width: `0%`, background: metric.color }}
                 />
               </div>
             </div>
             <div style={{ fontSize: "var(--text-xs)", color: "var(--color-text-muted)", marginTop: "var(--space-2)" }}>
-              {metric.delta} vs yesterday
+              Awaiting Module integration
             </div>
           </div>
         ))}
@@ -180,31 +193,11 @@ function Dashboard() {
           <div className="card-header">
             <div>
               <div className="card-title">Production Target vs Actual</div>
-              <div className="card-subtitle">Units per hour · Today Morning Shift</div>
+              <div className="card-subtitle">Module 6 integration pending</div>
             </div>
           </div>
-          <div className="card-body" style={{ padding: "var(--space-4) var(--space-5)" }}>
-            <ResponsiveContainer width="100%" height={240}>
-              <AreaChart data={mockProductionTrend} margin={{ top: 5, right: 10, left: -20, bottom: 0 }}>
-                <defs>
-                  <linearGradient id="gradTarget" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#1e40af" stopOpacity={0.15} />
-                    <stop offset="95%" stopColor="#1e40af" stopOpacity={0} />
-                  </linearGradient>
-                  <linearGradient id="gradActual" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#059669" stopOpacity={0.2} />
-                    <stop offset="95%" stopColor="#059669" stopOpacity={0} />
-                  </linearGradient>
-                </defs>
-                <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border)" vertical={false} />
-                <XAxis dataKey="time" tick={{ fontSize: 11, fill: "var(--color-text-muted)" }} axisLine={false} tickLine={false} />
-                <YAxis tick={{ fontSize: 11, fill: "var(--color-text-muted)" }} axisLine={false} tickLine={false} />
-                <Tooltip content={<CustomTooltip />} />
-                <Legend iconType="circle" iconSize={8} wrapperStyle={{ fontSize: 12 }} />
-                <Area type="monotone" dataKey="target" name="Target" stroke="#1e40af" strokeWidth={2} fill="url(#gradTarget)" strokeDasharray="5 4" />
-                <Area type="monotone" dataKey="actual" name="Actual" stroke="#059669" strokeWidth={2} fill="url(#gradActual)" />
-              </AreaChart>
-            </ResponsiveContainer>
+          <div className="card-body" style={{ padding: "var(--space-4) var(--space-5)", display: "flex", alignItems: "center", justifyContent: "center", height: 240 }}>
+            <div style={{ color: "var(--color-text-muted)" }}>No data available yet</div>
           </div>
         </div>
 
@@ -213,21 +206,13 @@ function Dashboard() {
           <div className="card-header">
             <div>
               <div className="card-title">Active Alerts</div>
-              <div className="card-subtitle">{mockAlerts.length} requiring attention</div>
+              <div className="card-subtitle">Module 7 integration pending</div>
             </div>
-            <span className="badge badge-danger">{mockAlerts.length} Active</span>
+            <span className="badge badge-neutral">0 Active</span>
           </div>
           <div className="card-body" style={{ padding: "var(--space-4)" }}>
             <div className="alert-list">
-              {mockAlerts.map(alert => (
-                <div key={alert.id} className={`alert-row alert-${alert.type}`}>
-                  <span className="alert-row-icon">{alert.icon}</span>
-                  <div className="alert-row-content">
-                    <div className="alert-row-title">{alert.title}</div>
-                    <div className="alert-row-meta">{alert.meta}</div>
-                  </div>
-                </div>
-              ))}
+              <div style={{ color: "var(--color-text-muted)", fontSize: "var(--text-sm)", textAlign: "center", padding: "var(--space-4)" }}>No active alerts</div>
             </div>
           </div>
         </div>
@@ -237,7 +222,7 @@ function Dashboard() {
           <div className="card-header">
             <div>
               <div className="card-title">Machine Status</div>
-              <div className="card-subtitle">12 assets · {mockMachines.filter(m => m.status === "running").length} running</div>
+              <div className="card-subtitle">Module 6 integration pending</div>
             </div>
             <div style={{ display: "flex", gap: 12, fontSize: "var(--text-xs)" }}>
               {[["dot-green", "Running"], ["dot-amber", "Idle"], ["dot-red", "Down"], ["dot-blue", "Setup"]].map(([cls, label]) => (
@@ -247,10 +232,8 @@ function Dashboard() {
               ))}
             </div>
           </div>
-          <div className="card-body">
-            <div className="machine-grid">
-              {mockMachines.map(m => <MachineCard key={m.id} machine={m} />)}
-            </div>
+          <div className="card-body" style={{ padding: "var(--space-4)", display: "flex", alignItems: "center", justifyContent: "center", minHeight: 150 }}>
+            <div style={{ color: "var(--color-text-muted)" }}>Machine tracking not yet integrated</div>
           </div>
         </div>
 
@@ -259,23 +242,8 @@ function Dashboard() {
           <div className="card-header">
             <div className="card-title">Production Activity</div>
           </div>
-          <div className="card-body" style={{ padding: "var(--space-4) var(--space-5)" }}>
-            <div className="timeline">
-              {mockActivityFeed.map(item => (
-                <div key={item.id} className="timeline-item">
-                  <div className="timeline-line">
-                    <div className={`timeline-dot timeline-dot-${item.type}`}>
-                      <span style={{ fontSize: 10 }}>{item.icon}</span>
-                    </div>
-                    <div className="timeline-connector" />
-                  </div>
-                  <div className="timeline-content">
-                    <div className="timeline-title">{item.title}</div>
-                    <div className="timeline-meta">{item.meta}</div>
-                  </div>
-                </div>
-              ))}
-            </div>
+          <div className="card-body" style={{ padding: "var(--space-4) var(--space-5)", minHeight: 150, display: "flex", alignItems: "center", justifyContent: "center" }}>
+             <div style={{ color: "var(--color-text-muted)" }}>No recent activity logged</div>
           </div>
         </div>
 
@@ -283,7 +251,7 @@ function Dashboard() {
         <div className="card grid-col-12">
           <div className="card-header">
             <div>
-              <div className="card-title">Active & Upcoming Orders</div>
+              <div className="card-title">Active &amp; Eligible Schedules</div>
               <div className="card-subtitle">Orders in progress and queued for this shift</div>
             </div>
           </div>
@@ -302,14 +270,17 @@ function Dashboard() {
                 </tr>
               </thead>
               <tbody>
-                {upcomingOrders.map(order => {
-                  const pct = order.qty > 0 ? Math.round((order.completed / order.qty) * 100) : 0
-                  const priorityClass = { Critical: "priority-critical", High: "priority-high", Medium: "priority-medium", Low: "priority-low" }
+                {upcomingOrders.map(item => {
+                  const priorityClass = { CRITICAL: "priority-critical", HIGH: "priority-high", MEDIUM: "priority-medium", LOW: "priority-low" }
+                  const matchingOrder = orders.find(o => o.id === item.production_order_id) || { produced_quantity: 0, quantity: item.quantity, status: "UNKNOWN" }
+                  
+                  const pct = matchingOrder.quantity > 0 ? Math.round((matchingOrder.produced_quantity / matchingOrder.quantity) * 100) : 0
+                  
                   return (
-                    <tr key={order.id}>
-                      <td><span className="order-number">{order.id}</span></td>
-                      <td className="table-cell-strong">{order.product}</td>
-                      <td>{order.completed} / {order.qty}</td>
+                    <tr key={item.production_schedule_id}>
+                      <td><span className="order-number">{item.order_number}</span></td>
+                      <td className="table-cell-strong">{item.product_name}</td>
+                      <td>{matchingOrder.produced_quantity} / {matchingOrder.quantity}</td>
                       <td style={{ minWidth: 120 }}>
                         <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
                           <div className="progress-bar-track" style={{ flex: 1 }}>
@@ -318,13 +289,20 @@ function Dashboard() {
                           <span style={{ fontSize: "var(--text-xs)", color: "var(--color-text-muted)", minWidth: 30 }}>{pct}%</span>
                         </div>
                       </td>
-                      <td><StatusBadge status={order.status} /></td>
-                      <td><span className={`badge ${priorityClass[order.priority]}`}>{order.priority}</span></td>
-                      <td style={{ color: "var(--color-text-secondary)", fontSize: "var(--text-sm)" }}>{order.dueDate}</td>
-                      <td><span className="chip">{order.workcenter}</span></td>
+                      <td><StatusBadge status={matchingOrder.status} /></td>
+                      <td><span className={`badge ${priorityClass[item.priority] || "badge-neutral"}`}>{item.priority}</span></td>
+                      <td style={{ color: "var(--color-text-secondary)", fontSize: "var(--text-sm)" }}>
+                        {matchingOrder.due_date ? new Date(matchingOrder.due_date).toLocaleDateString() : 'N/A'}
+                      </td>
+                      <td><span className="chip">{item.work_center_code}</span></td>
                     </tr>
                   )
                 })}
+                {upcomingOrders.length === 0 && (
+                   <tr>
+                      <td colSpan="8" style={{ textAlign: "center", padding: "var(--space-8)", color: "var(--color-text-muted)" }}>No eligible schedules found.</td>
+                   </tr>
+                )}
               </tbody>
             </table>
           </div>

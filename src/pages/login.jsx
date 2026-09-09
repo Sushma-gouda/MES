@@ -104,7 +104,7 @@ function Login() {
             Production intelligence<br />at your fingertips.
           </h1>
           <p className="auth-left-subheadline">
-            NexusMES connects your shop floor to your planning team — in real time, every shift, every order.
+            MES connects your shop floor to your planning team — in real time, every shift, every order.
           </p>
           <ul className="auth-left-features">
             <li className="auth-left-feature"><span className="auth-feature-dot" />Real-time OEE & production monitoring</li>
@@ -128,7 +128,7 @@ function Login() {
           <div className="auth-form-header">
             <p className="auth-form-eyebrow">Secure Sign In</p>
             <h2 className="auth-form-title">Welcome back</h2>
-            <p className="auth-form-subtitle">Sign in to your NexusMES workspace</p>
+            <p className="auth-form-subtitle">Sign in to your MES workspace</p>
           </div>
 
           <form className="auth-form" onSubmit={handleSubmit} noValidate>

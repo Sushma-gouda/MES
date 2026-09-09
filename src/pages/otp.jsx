@@ -115,7 +115,7 @@ function OTP() {
             One last step<br />before you're in.
           </h1>
           <p className="auth-left-subheadline">
-            We sent a verification code to your email. Enter it to activate your NexusMES account.
+            We sent a verification code to your email. Enter it to activate your MES account.
           </p>
           <ul className="auth-left-features">
             <li className="auth-left-feature"><span className="auth-feature-dot" />Code expires in 10 minutes</li>

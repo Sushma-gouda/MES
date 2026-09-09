@@ -8,6 +8,7 @@ const routeLabels = {
   "/production-orders": ["Plan & Release", "Production Orders"],
   "/planning": ["Plan & Release", "Planning & Scheduling"],
   "/capacity": ["Plan & Release", "Capacity Planning"],
+  "/mes-dispatch": ["Plan & Release", "Dispatch to MES"],
   "/staging": ["Execute", "Staging & Kitting"],
   "/operations": ["Execute", "Operations & BOM"],
   "/machine-setup": ["Execute", "Machine Setup"],
@@ -104,7 +105,7 @@ function Topbar({ collapsed, onMenuToggle, user }) {
         {/* Breadcrumbs */}
         {crumbs.length > 0 && (
           <nav className="breadcrumbs" aria-label="Breadcrumb">
-            <span className="breadcrumb-item">NexusMES</span>
+            <span className="breadcrumb-item">MES</span>
             {crumbs.map((crumb, i) => (
               <span key={i} style={{ display: "flex", alignItems: "center", gap: "var(--space-2)" }}>
                 <ChevronSep />

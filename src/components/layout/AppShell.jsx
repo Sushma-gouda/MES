@@ -36,7 +36,7 @@ function AppShell() {
         })
       } catch {
         // Backend unreachable — use stub so app still works in dev
-        setUser({ name: "Demo User", email: "demo@nexusmes.io", role: "Supervisor", is_verified: true })
+        setUser({ name: "Demo User", email: "demo@MES.io", role: "Supervisor", is_verified: true })
       }
     }
 

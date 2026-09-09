@@ -79,7 +79,7 @@ function LandingPage() {
     <div className="landing-root">
       {/* Navbar */}
       <nav className="landing-nav">
-        <Link to="/" className="landing-nav-brand" aria-label="NexusMES Home">
+        <Link to="/" className="landing-nav-brand" aria-label="MES Home">
           <div className="landing-nav-icon"><FactoryIcon /></div>
           <span className="landing-nav-name">Nexus<span>MES</span></span>
         </Link>
@@ -124,7 +124,7 @@ function LandingPage() {
           </h1>
 
           <p className="hero-subtitle">
-            NexusMES connects planning, execution, quality, and dispatch into one unified platform.
+            MES connects planning, execution, quality, and dispatch into one unified platform.
             From work order release to customer delivery — every step tracked, every metric visible.
           </p>
 
@@ -164,7 +164,7 @@ function LandingPage() {
           <p className="section-eyebrow">Core Capabilities</p>
           <h2 className="section-title">Everything your production team needs</h2>
           <p className="section-subtitle">
-            NexusMES covers the full MES scope — from planning to dispatch — in a single integrated platform.
+            MES covers the full MES scope — from planning to dispatch — in a single integrated platform.
           </p>
 
           <div className="capabilities-grid">
@@ -212,7 +212,7 @@ function LandingPage() {
           <p className="section-eyebrow">How It Works</p>
           <h2 className="section-title">The complete MES workflow</h2>
           <p className="section-subtitle">
-            NexusMES guides your team through every stage of the production lifecycle.
+            MES guides your team through every stage of the production lifecycle.
           </p>
 
           <div className="workflow-steps" style={{ marginTop: "var(--space-12)" }}>
@@ -230,7 +230,7 @@ function LandingPage() {
       {/* Trust */}
       <section className="landing-section trust-section">
         <div className="landing-section-inner">
-          <p className="section-eyebrow">Why NexusMES</p>
+          <p className="section-eyebrow">Why MES</p>
           <h2 className="section-title">Built for real manufacturing operations</h2>
 
           <div className="trust-grid">
@@ -313,7 +313,7 @@ function LandingPage() {
           </div>
 
           <div className="footer-bottom">
-            <span>© 2026 NexusMES. All rights reserved.</span>
+            <span>© 2026 MES. All rights reserved.</span>
             <span>Manufacturing Execution System · Production Intelligence Platform</span>
           </div>
         </div>
