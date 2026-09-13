@@ -4,6 +4,9 @@ import Sidebar from "./Sidebar"
 import Topbar from "./Topbar"
 import "../../styles/app.css"
 
+const API_BASE_URL = import.meta.env.VITE_API_URL || "http://127.0.0.1:8000";
+
+
 function AppShell() {
   const [collapsed, setCollapsed] = useState(false)
   const [mobileOpen, setMobileOpen] = useState(false)
@@ -20,7 +23,7 @@ function AppShell() {
 
     const fetchUser = async () => {
       try {
-        const response = await fetch("http://127.0.0.1:8000/auth/me", {
+        const response = await fetch(`${API_BASE_URL}/auth/me`, {
           method: "GET",
           headers: { Authorization: `Bearer ${token}` },
         })

@@ -3,6 +3,9 @@ import { Play, CheckCircle, Clock } from "lucide-react"
 import "../../styles/pages.css"
 import "../../styles/components.css"
 
+const API_BASE_URL = import.meta.env.VITE_API_URL || "http://127.0.0.1:8000";
+
+
 function DispatchToMES() {
   const [eligibleSchedules, setEligibleSchedules] = useState([])
   const [dispatchQueue, setDispatchQueue] = useState([])
@@ -39,8 +42,8 @@ function DispatchToMES() {
 
     try {
       const [eligibleRes, queueRes] = await Promise.all([
-        fetch("http://127.0.0.1:8000/dispatch-mes/eligible", { headers }),
-        fetch("http://127.0.0.1:8000/dispatch-mes/queue", { headers })
+        fetch(`${API_BASE_URL}/dispatch-mes/eligible`, { headers }),
+        fetch(`${API_BASE_URL}/dispatch-mes/queue`, { headers })
       ])
 
       if (!eligibleRes.ok || !queueRes.ok) {
@@ -73,7 +76,7 @@ function DispatchToMES() {
     }
 
     try {
-      const res = await fetch(`http://127.0.0.1:8000/dispatch-mes/dispatch/${scheduleId}`, {
+      const res = await fetch(`${API_BASE_URL}/dispatch-mes/dispatch/${scheduleId}`, {
         method: "POST",
         headers
       })

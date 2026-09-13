@@ -3,6 +3,9 @@ import { Package, Search, AlertCircle, CheckCircle2, X } from "lucide-react"
 import "../../styles/pages.css"
 import "../../styles/components.css"
 
+const API_BASE_URL = import.meta.env.VITE_API_URL || "http://127.0.0.1:8000";
+
+
 function StagingKitting() {
   const [kits, setKits] = useState([])
   const [kitItems, setKitItems] = useState([])
@@ -40,11 +43,11 @@ function StagingKitting() {
         ordersRes,
         wcRes
       ] = await Promise.all([
-        fetch("http://127.0.0.1:8000/staging-kitting/kits", { headers }),
-        fetch("http://127.0.0.1:8000/staging-kitting/kit-items", { headers }),
-        fetch("http://127.0.0.1:8000/staging-kitting/materials", { headers }),
-        fetch("http://127.0.0.1:8000/production-orders/", { headers }),
-        fetch("http://127.0.0.1:8000/production-schedules/work-centers", { headers })
+        fetch(`${API_BASE_URL}/staging-kitting/kits`, { headers }),
+        fetch(`${API_BASE_URL}/staging-kitting/kit-items`, { headers }),
+        fetch(`${API_BASE_URL}/staging-kitting/materials`, { headers }),
+        fetch(`${API_BASE_URL}/production-orders/`, { headers }),
+        fetch(`${API_BASE_URL}/production-schedules/work-centers`, { headers })
       ])
 
       if (!kitsRes.ok) throw new Error("Failed to fetch kits")
@@ -147,7 +150,7 @@ function StagingKitting() {
       setActionError("")
       const token = localStorage.getItem("access_token")
 
-      const res = await fetch(`http://127.0.0.1:8000/staging-kitting/kits/${kitId}/${action}`, {
+      const res = await fetch(`${API_BASE_URL}/staging-kitting/kits/${kitId}/${action}`, {
         method: "POST",
         headers: {
           Authorization: `Bearer ${token}`

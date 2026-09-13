@@ -1,6 +1,9 @@
 import { useEffect, useState } from "react"
 import { useNavigate } from "react-router-dom"
 
+const API_BASE_URL = import.meta.env.VITE_API_URL || "http://127.0.0.1:8000";
+
+
 function Dashboard() {
   const [user, setUser] = useState(null)
   const [error, setError] = useState("")
@@ -19,7 +22,7 @@ function Dashboard() {
     const getCurrentUser = async () => {
       try {
         const response = await fetch(
-          "http://127.0.0.1:8000/auth/me",
+          `${API_BASE_URL}/auth/me`,
           {
             method: "GET",
             headers: {

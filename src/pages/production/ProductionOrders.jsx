@@ -6,6 +6,9 @@ import autoTable from "jspdf-autotable"
 import "../../styles/pages.css"
 import "../../styles/components.css"
 
+const API_BASE_URL = import.meta.env.VITE_API_URL || "http://127.0.0.1:8000";
+
+
 function StatusBadge({ status }) {
   const map = {
     RECEIVED: "neutral",
@@ -105,7 +108,7 @@ function ProductionOrders() {
         return
       }
 
-      const response = await fetch("http://127.0.0.1:8000/production-orders/", {
+      const response = await fetch(`${API_BASE_URL}/production-orders/`, {
         method: "GET",
         headers: {
           Authorization: `Bearer ${token}`,
@@ -151,8 +154,8 @@ function ProductionOrders() {
       const headers = { Authorization: `Bearer ${token}` }
 
       const [resCust, resProd] = await Promise.all([
-        fetch("http://127.0.0.1:8000/customers/", { headers }),
-        fetch("http://127.0.0.1:8000/products/", { headers }),
+        fetch(`${API_BASE_URL}/customers/`, { headers }),
+        fetch(`${API_BASE_URL}/products/`, { headers }),
       ])
 
       if (resCust.ok) setCustomers(await resCust.json())
@@ -200,7 +203,7 @@ function ProductionOrders() {
         due_date: new Date(formData.due_date).toISOString()
       }
 
-      const response = await fetch("http://127.0.0.1:8000/production-orders/", {
+      const response = await fetch(`${API_BASE_URL}/production-orders/`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -308,7 +311,7 @@ function ProductionOrders() {
     try {
       setActionLoading(true)
       const token = localStorage.getItem("access_token")
-      const response = await fetch(`http://127.0.0.1:8000/production-orders/${id}/${action}`, {
+      const response = await fetch(`${API_BASE_URL}/production-orders/${id}/${action}`, {
         method: "POST",
         headers: {
           Authorization: `Bearer ${token}`,
@@ -351,7 +354,7 @@ function ProductionOrders() {
     try {
       setActionLoading(true)
       const token = localStorage.getItem("access_token")
-      const response = await fetch(`http://127.0.0.1:8000/production-orders/${selectedOrderId}/hold`, {
+      const response = await fetch(`${API_BASE_URL}/production-orders/${selectedOrderId}/hold`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -379,7 +382,7 @@ function ProductionOrders() {
     try {
       setActionLoading(true)
       const token = localStorage.getItem("access_token")
-      const response = await fetch(`http://127.0.0.1:8000/production-orders/${id}`, {
+      const response = await fetch(`${API_BASE_URL}/production-orders/${id}`, {
         method: "GET",
         headers: {
           Authorization: `Bearer ${token}`,

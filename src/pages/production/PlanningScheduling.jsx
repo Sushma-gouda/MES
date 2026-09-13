@@ -3,6 +3,9 @@ import { Filter, Calendar, ChevronLeft, ChevronRight, Plus, X } from "lucide-rea
 import "../../styles/pages.css"
 import "../../styles/components.css"
 
+const API_BASE_URL = import.meta.env.VITE_API_URL || "http://127.0.0.1:8000";
+
+
 function PlanningScheduling() {
   const [currentDate, setCurrentDate] = useState(new Date())
   const [workCenters, setWorkCenters] = useState([])
@@ -63,9 +66,9 @@ function PlanningScheduling() {
 
     try {
       const [wcRes, schedRes, ordersRes] = await Promise.all([
-        fetch("http://127.0.0.1:8000/production-schedules/work-centers", { headers }),
-        fetch("http://127.0.0.1:8000/production-schedules/", { headers }),
-        fetch("http://127.0.0.1:8000/production-orders/", { headers })
+        fetch(`${API_BASE_URL}/production-schedules/work-centers`, { headers }),
+        fetch(`${API_BASE_URL}/production-schedules/`, { headers }),
+        fetch(`${API_BASE_URL}/production-orders/`, { headers })
       ])
 
       if (!wcRes.ok || !schedRes.ok || !ordersRes.ok) {
@@ -124,7 +127,7 @@ function PlanningScheduling() {
 
     const token = localStorage.getItem("access_token")
     try {
-      const res = await fetch("http://127.0.0.1:8000/production-schedules/", {
+      const res = await fetch(`${API_BASE_URL}/production-schedules/`, {
         method: "POST",
         headers: {
           "Authorization": `Bearer ${token}`,
@@ -169,7 +172,7 @@ function PlanningScheduling() {
 
     const token = localStorage.getItem("access_token")
     try {
-      const res = await fetch(`http://127.0.0.1:8000/production-schedules/${selectedSchedule.id}`, {
+      const res = await fetch(`${API_BASE_URL}/production-schedules/${selectedSchedule.id}`, {
         method: "PUT",
         headers: {
           "Authorization": `Bearer ${token}`,
@@ -201,7 +204,7 @@ function PlanningScheduling() {
   const handleDispatch = async (scheduleId) => {
     const token = localStorage.getItem("access_token")
     try {
-      const res = await fetch(`http://127.0.0.1:8000/production-schedules/${scheduleId}/dispatch`, {
+      const res = await fetch(`${API_BASE_URL}/production-schedules/${scheduleId}/dispatch`, {
         method: "POST",
         headers: {
           "Authorization": `Bearer ${token}`,

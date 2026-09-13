@@ -2,6 +2,9 @@ import { useState, useEffect } from "react"
 import "../../styles/pages.css"
 import "../../styles/components.css"
 
+const API_BASE_URL = import.meta.env.VITE_API_URL || "http://127.0.0.1:8000";
+
+
 // ===== KPI CARD =====
 function KPICard({ label, value, unit = "", delta, trend, color, icon }) {
   return (
@@ -71,8 +74,8 @@ function Dashboard() {
         const headers = { Authorization: `Bearer ${token}` }
 
         const [ordersRes, schedulesRes] = await Promise.all([
-          fetch("http://127.0.0.1:8000/production-orders/", { headers }),
-          fetch("http://127.0.0.1:8000/dispatch-mes/eligible", { headers })
+          fetch(`${API_BASE_URL}/production-orders/`, { headers }),
+          fetch(`${API_BASE_URL}/dispatch-mes/eligible`, { headers })
         ])
 
         if (!ordersRes.ok) throw new Error("Failed to fetch production orders")

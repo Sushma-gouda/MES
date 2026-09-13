@@ -3,6 +3,9 @@ import { AlertTriangle, TrendingUp, BarChart2, CheckCircle, XCircle, X } from "l
 import "../../styles/pages.css"
 import "../../styles/components.css"
 
+const API_BASE_URL = import.meta.env.VITE_API_URL || "http://127.0.0.1:8000";
+
+
 function CapacityPlanning() {
   const [workCenters, setWorkCenters] = useState([])
   const [machineCapacities, setMachineCapacities] = useState([])
@@ -55,10 +58,10 @@ function CapacityPlanning() {
 
     try {
       const [wcRes, mcRes, schedRes, toolsRes] = await Promise.all([
-        fetch("http://127.0.0.1:8000/production-schedules/work-centers", { headers }),
-        fetch("http://127.0.0.1:8000/capacity-planning/machine-capacities", { headers }),
-        fetch("http://127.0.0.1:8000/production-schedules/", { headers }),
-        fetch("http://127.0.0.1:8000/capacity-planning/tools", { headers })
+        fetch(`${API_BASE_URL}/production-schedules/work-centers`, { headers }),
+        fetch(`${API_BASE_URL}/capacity-planning/machine-capacities`, { headers }),
+        fetch(`${API_BASE_URL}/production-schedules/`, { headers }),
+        fetch(`${API_BASE_URL}/capacity-planning/tools`, { headers })
       ])
 
       if (!wcRes.ok || !mcRes.ok || !schedRes.ok || !toolsRes.ok) {
@@ -110,7 +113,7 @@ function CapacityPlanning() {
         required_end: new Date(simulateFormData.required_end).toISOString(),
       }
 
-      const reqRes = await fetch("http://127.0.0.1:8000/capacity-planning/requirements", {
+      const reqRes = await fetch(`${API_BASE_URL}/capacity-planning/requirements`, {
         method: "POST",
         headers,
         body: JSON.stringify(payload)
@@ -121,7 +124,7 @@ function CapacityPlanning() {
         throw new Error(getErrorMessage(errData, "Failed to create requirement"))
       }
 
-      const chkRes = await fetch(`http://127.0.0.1:8000/capacity-planning/check/${scheduleId}`, {
+      const chkRes = await fetch(`${API_BASE_URL}/capacity-planning/check/${scheduleId}`, {
         method: "POST",
         headers
       })
